@@ -18,4 +18,18 @@ Werkzeug==3.1.9
 OS : windows 10/11
 libs : pycryptodome cryptography flask bcrypt
 ![alt text](<Screenshot 2026-10-17 173025-1.png>)
-![alt text](<Screenshot 2026-10-17 173155.png>) ![alt text](<Screenshot 2026-10-17 174343.png>) ![alt text](<Screenshot 2026-10-17 175753.png>) ![alt text](<Screenshot 2026-10-17 180928.png>) ![alt text](<Screenshot 2026-10-17 181145.png>) ![alt text](<Screenshot 2026-10-17 181607.png>)
+![alt text](<Screenshot 2026-10-17 173155.png>)
+ ![alt text](<Screenshot 2026-10-17 174343.png>)
+  ![alt text](<Screenshot 2026-10-17 175753.png>)
+   ![alt text](<Screenshot 2026-10-17 180928.png>)
+    ![alt text](<Screenshot 2026-10-17 181145.png>)
+     ![alt text](<Screenshot 2026-10-17 181607.png>)
+
+![alt text](<Screenshot 2026-10-17 205405.png>)
+ ![alt text](<Screenshot 2026-10-17 193657.png>)
+  ![alt text](<Screenshot 2026-10-17 194233.png>)
+   ![alt text](<Screenshot 2026-10-17 194349.png>)
+    ![alt text](<Screenshot 2026-10-17 194614.png>)
+     ![alt text](<Screenshot 2026-10-17 194758.png>)
+      ![alt text](<Screenshot 2026-10-17 203509.png>)
+       ![alt text](<Screenshot 2026-10-17 203957.png>)
