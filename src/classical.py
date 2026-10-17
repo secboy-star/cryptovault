@@ -1,7 +1,8 @@
+import string
 def caesar_encrypt(plaintext, shift):
     result = []
     for char in plaintext: 
-        if char.isalpha():
+        if char in string.ascii_letters:
             base = ord("A") if char.isupper() else ord("a")
             result.append(chr((ord(char) - base + shift) % 26 + base))
         else:
