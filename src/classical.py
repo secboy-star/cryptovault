@@ -18,6 +18,8 @@ def caesar_brute_force(ciphertext):
 
 def vigenere_encrypt(plaintext, key):
     result =[]
+    if not key.isalpha() or not key.isascii():
+        raise ValueError("La cle doit contenir uniquement des lettres A-Z")
     key = key.upper()
     key_index = 0
     for char in plaintext:
@@ -32,6 +34,8 @@ def vigenere_encrypt(plaintext, key):
 
 def vigenere_decrypt(ciphertext, key):
     result = []
+    if not key.isalpha() or not key.isascii():
+        raise ValueError("La cle doit contenir uniquement des lettres A-Z")
     key = key.upper()
     key_index = 0
     for char in ciphertext:
@@ -53,7 +57,7 @@ if __name__ == "__main__":
     print (f"Dechiffre: {caesar_decrypt(encrypted, 13)}")
     """
     msg = "NHAR KBIR HADA ASSI SALMI"
-    key = "CLEBEAUCOUPPLUSLONGUE"
+    key = "key"
     enc = vigenere_encrypt(msg, key)
     print(f"Cle: {key} | Chiffre :{enc}")
     print(f"Dechiffre: {vigenere_decrypt(enc, key)}")
