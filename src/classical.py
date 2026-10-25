@@ -48,17 +48,35 @@ def vigenere_decrypt(ciphertext, key):
             result.append(char)
     return "".join(result)
 
+def xor_encrypt(data: bytes, key: bytes) -> bytes:
+    return bytes([b ^ key[i % len(key)] for i, b in enumerate(data)])
+
+xor_decrypt = xor_encrypt
+
 if __name__ == "__main__":
+    
+    message = b"Donnees sensibles"
+    key = b"CLE_SECRETE"
+    encrypted = xor_encrypt(message, key)
+    decrypted = xor_decrypt(encrypted, key)
+    print(f"Chiffre: {encrypted.hex()}")
+    print(f"Dechiffre: {decrypted}")
+    print(xor_encrypt(encrypted, message))
+    tampered = bytearray(encrypted)
+    tampered[0] ^= 0x01
+    print(xor_decrypt(bytes(tampered), key))
+    
     """
     message = "Hellow Wörld! 2026"
     encrypted = caesar_encrypt(message, 13)
     print (f"Original: {message}")
     print (f"Chiffre: {encrypted}")
     print (f"Dechiffre: {caesar_decrypt(encrypted, 13)}")
-    """
+    
     msg = "NHAR KBIR HADA ASSI SALMI"
     key = "key"
     enc = vigenere_encrypt(msg, key)
     print(f"Cle: {key} | Chiffre :{enc}")
     print(f"Dechiffre: {vigenere_decrypt(enc, key)}")
+    """
 
