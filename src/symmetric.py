@@ -24,6 +24,21 @@ def aes_gcm_decrypt(enc_data: dict, key: bytes) -> str:
 if __name__ == "__main__":
     key = get_random_bytes(32)
     msg = "Informations confidentielles"
+    enc2 = aes_gcm_encrypt(msg, key)
+
+    try:
+        print(aes_gcm_decrypt(enc2, get_random_bytes(32)))
+    except ValueError as e:
+        print("Mauvaise cle:", e)
+
+    try:
+        aes_gcm_encrypt(msg, get_random_bytes(10))
+    except ValueError as e:
+        print("Cle de 10 octets:", e)
+
+    print("nonce =", len(base64.b64decode(enc2["nonce"])), "octets")
+    print("tag   =", len(base64.b64decode(enc2["tag"])), "octets")
+    '''
     enc = aes_gcm_encrypt(msg, key)
     print(f"Chiffre: {enc}")
     print(f"Dechiffre: {aes_gcm_decrypt(enc, key)}")
@@ -35,3 +50,4 @@ if __name__ == "__main__":
         print(aes_gcm_decrypt(enc, key))
     except ValueError as e:
         print("Attaque detectee:", e)
+    '''
