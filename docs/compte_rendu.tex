@@ -1,0 +1,728 @@
+% ==========================================================
+%  Compte rendu - Projet 1 : CryptoVault
+%  ENSA Agadir - SITCN
+%  Compiler avec : pdflatex (2 fois) ou Overleaf
+%  Les captures d'ecran vont dans le dossier  img/
+%  (a cote de ce fichier). Image absente => cadre rouge, pas d'erreur.
+% ==========================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Informations a personnaliser ----------
+\newcommand{\auteur}{Abdellah SALMI}
+\newcommand{\filiere}{ENSA Agadir -- SITCN}
+\newcommand{\depot}{https://github.com/secboy-star/cryptovault}
+% --------------------------------------------------
+
+% Rappel visible pour ce qu'il reste a remplir
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[A COMPLETER : #1]}}}
+
+% Couleurs
+\definecolor{ensablue}{RGB}{23,64,122}
+\definecolor{codebg}{RGB}{245,245,247}
+\definecolor{codegreen}{RGB}{0,128,70}
+\definecolor{codegray}{RGB}{110,110,110}
+
+% Figure avec repli si l'image n'existe pas encore
+% Usage : \fig[largeur]{fichier.png}{Legende}
+\newcommand{\fig}[3][0.9]{%
+  \begin{figure}[H]
+    \centering
+    \IfFileExists{img/#2}{%
+      \includegraphics[width=#1\linewidth]{img/#2}%
+    }{%
+      \fbox{\parbox{0.8\linewidth}{\centering\color{red}%
+        Image manquante : \texttt{\detokenize{img/#2}}}}%
+    }
+    \caption{#3}
+  \end{figure}}
+
+% Listings Python
+\lstdefinestyle{py}{
+  language=Python,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{ensablue}\bfseries,
+  commentstyle=\color{codegreen}\itshape,
+  stringstyle=\color{BrickRed},
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codegray},
+  breaklines=true,
+  showstringspaces=false,
+  columns=fullflexible,
+  keepspaces=true,
+  tabsize=4,
+  xleftmargin=2pt,
+  xrightmargin=2pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {à}{{\`a}}1 {ö}{{\"o}}1
+}
+\lstdefinestyle{plain}{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codegray},
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  aboveskip=8pt,
+  belowskip=8pt
+}
+\lstset{style=py}
+
+% En-tete / pied de page
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small CryptoVault -- Compte rendu}
+\rhead{\small \filiere}
+\cfoot{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\captionsetup{font=small,labelfont=bf}
+\setlist{itemsep=2pt,topsep=4pt}
+
+% Titres de sections en couleur
+\usepackage{titlesec}
+\titleformat{\section}{\Large\bfseries\color{ensablue}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\color{ensablue}}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{ensablue}}{\thesubsubsection}{0.6em}{}
+
+\hypersetup{pdftitle={CryptoVault - Compte rendu},pdfauthor={\auteur}}
+
+\begin{document}
+
+% ==========================================================
+%  PAGE DE GARDE
+% ==========================================================
+\begin{titlepage}
+  \centering
+  \vspace*{1.5cm}
+  {\large\color{ensablue}\textbf{\filiere}}\\[0.4cm]
+  {\small Cybers\'ecurit\'e -- Portfolio de projets}\\[2.5cm]
+
+  {\Huge\bfseries\color{ensablue} Projet 1 : CryptoVault}\\[0.6cm]
+  {\Large Biblioth\`eque de cryptographie en Python}\\[0.3cm]
+  {\large Compte rendu d'avancement}\\[2.5cm]
+
+  \begin{tabular}{rl}
+    \textbf{R\'ealis\'e par :} & \auteur\\[4pt]
+    \textbf{D\'ep\^ot GitHub :} & \url{\depot}\\[4pt]
+    \textbf{Date :} & \today
+  \end{tabular}
+
+  \vfill
+  {\small Projet \'educatif -- ne pas utiliser en production.}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ==========================================================
+%  1. INTRODUCTION
+% ==========================================================
+\section{Introduction}
+
+\subsection{Contexte}
+CryptoVault est le premier projet d'une trajectoire de projets en cybers\'ecurit\'e.
+Il consiste \`a construire, pas \`a pas, une biblioth\`eque de cryptographie en Python :
+des chiffrements classiques (C\'esar, Vigen\`ere, XOR) jusqu'\`a un gestionnaire de
+secrets avec PKI, messagerie chiffr\'ee de bout en bout et rotation de cl\'es.
+
+\subsection{Objectifs d'apprentissage}
+\begin{itemize}
+  \item Comprendre les fondements math\'ematiques de la cryptographie.
+  \item Impl\'ementer des algorithmes sym\'etriques (AES-GCM) et asym\'etriques (RSA-OAEP).
+  \item Construire une infrastructure PKI avec certificats X.509.
+  \item D\'evelopper un gestionnaire de secrets s\'ecuris\'e avec journal d'audit.
+\end{itemize}
+
+\subsection{\'Etat d'avancement}
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{@{}l X c@{}}
+    \toprule
+    \textbf{Niveau / \'Etape} & \textbf{Contenu} & \textbf{Statut}\\
+    \midrule
+    Niveau 0 -- \'Etape 1 & Chiffre de C\'esar & Termin\'e\\
+    Niveau 0 -- \'Etape 2 & Chiffre de Vigen\`ere & Termin\'e\\
+    Niveau 0 -- \'Etape 3 & Chiffrement XOR & Termin\'e\\
+    Niveau 0 -- \'Etape 4 & AES-256-GCM & Termin\'e\\
+    Niveau 0 -- \'Etape 5 & RSA (chiffrement et signature) & En cours\\
+    Niveau 0 -- \'Etape 6 & \'Echange de cl\'es Diffie-Hellman & \`A venir\\
+    Niveaux 1, 2, 3 & Biblioth\`eque, PKI et messagerie E2E, gestionnaire de secrets & \`A venir\\
+    \bottomrule
+  \end{tabularx}
+  \caption{Avancement du projet \`a la date de ce compte rendu.}
+\end{table}
+
+\subsection{M\'ethode de travail}
+Pour chaque \'etape, la m\^eme d\'emarche est appliqu\'ee :
+\begin{enumerate}
+  \item \'ecrire le code \`a la main et comprendre chaque ligne ;
+  \item le tester, puis essayer de le casser (entr\'ees limites, cl\'es invalides, donn\'ees modifi\'ees) ;
+  \item enregistrer le r\'esultat par une capture d'\'ecran ;
+  \item cr\'eer un \emph{commit} Git au message explicite, puis le publier sur GitHub ;
+  \item consigner dans ce compte rendu le principe, le r\'esultat, les erreurs rencontr\'ees et les limites.
+\end{enumerate}
+
+\subsection{Transparence sur l'usage de l'intelligence artificielle}
+Un assistant d'IA (Claude, d\'evelopp\'e par Anthropic) est utilis\'e comme \emph{tuteur} :
+il explique le code ligne par ligne et propose des pistes d'exp\'erimentation. Le code
+est saisi, ex\'ecut\'e, test\'e et modifi\'e par l'\'etudiant, et les erreurs d\'ecouvertes
+lors des tests (sections~\ref{sec:cesar-bug} et~\ref{sec:vig-bug}) sont analys\'ees
+dans ce document.
+
+% ==========================================================
+%  2. ENVIRONNEMENT
+% ==========================================================
+\section{Environnement et outils}
+
+\subsection{Outils utilis\'es}
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{@{}l X@{}}
+    \toprule
+    \textbf{Outil} & \textbf{D\'etail}\\
+    \midrule
+    Syst\`eme & Windows\\
+    Langage & Python 3.13.5\\
+    \'Editeur & Visual Studio Code\\
+    Gestion de versions & Git et GitHub (d\'ep\^ot public)\\
+    Environnement virtuel & \texttt{venv} (dossier \texttt{crypto\_env})\\
+    \bottomrule
+  \end{tabularx}
+  \caption{Outils de d\'eveloppement.}
+\end{table}
+\fig[0.7]{Screenshot 2026-10-30 110104.png}{V\'erification de la version de Python install\'ee (\texttt{python --version}).}
+
+\subsection{Biblioth\`eques install\'ees}
+Les d\'ependances sont fig\'ees dans \texttt{requirements.txt} via \texttt{pip freeze}.
+Les biblioth\`eques principales sont :
+\begin{table}[H]
+  \centering
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    \textbf{Biblioth\`eque} & \textbf{Version} & \textbf{R\^ole}\\
+    \midrule
+    pycryptodome & 4.0.0 & AES-GCM, RSA, hachages\\
+    cryptography & 50.0.2 & Diffie-Hellman, certificats X.509\\
+    Flask & 3.1.3 & Messagerie chiffr\'ee (niveau 2)\\
+    bcrypt & 5.0.0 & Hachage de mots de passe (niveau 1)\\
+    \bottomrule
+  \end{tabular}
+  \caption{Biblioth\`eques principales (versions issues de \texttt{requirements.txt}).}
+\end{table}
+
+\subsection{Configuration de Git et clonage du d\'ep\^ot}
+Apr\`es la configuration de l'identit\'e Git (\texttt{user.name} et \texttt{user.email}), le d\'ep\^ot
+cr\'e\'e sur GitHub (avec README, \texttt{.gitignore} Python et licence MIT) est clon\'e en local.
+\fig{Screenshot 2026-10-17 173025.png}{Configuration de Git et clonage du d\'ep\^ot \texttt{cryptovault}.}
+
+\subsection{Environnement virtuel et d\'ependances}
+Un environnement virtuel isole les biblioth\`eques du projet de celles du syst\`eme.
+Il est cr\'e\'e et activ\'e, puis les d\'ependances sont install\'ees.
+\begin{lstlisting}[style=plain,language={}]
+python -m venv crypto_env
+crypto_env\Scripts\activate
+pip install pycryptodome cryptography flask bcrypt
+pip freeze > requirements.txt
+\end{lstlisting}
+\fig{Screenshot 2026-10-17 174343.png}{Cr\'eation de l'environnement virtuel et installation des d\'ependances.}
+Le fichier \texttt{requirements.txt} est ensuite g\'en\'er\'e :
+\fig[0.8]{Screenshot 2026-10-17 175753.png}{G\'en\'eration de \texttt{requirements.txt} avec \texttt{pip freeze}.}
+
+\subsection{Structure du projet}
+\begin{lstlisting}[style=plain,language={}]
+cryptovault/
+|-- src/
+|   |-- __init__.py
+|   |-- classical.py     # Cesar, Vigenere, XOR
+|   |-- symmetric.py     # AES-GCM
+|   |-- asymmetric.py    # RSA, Diffie-Hellman
+|   |-- hashing.py       # SHA-256, bcrypt, HMAC
+|   |-- pki.py           # Certificats X.509
+|   |-- secrets_mgr.py   # Gestionnaire de secrets
+|-- tests/
+|-- messenger/           # Messagerie E2E
+|-- docs/                # Compte rendu, captures d'ecran
+|-- requirements.txt
+|-- README.md
+\end{lstlisting}
+Le fichier \texttt{\_\_init\_\_.py} indique \`a Python que \texttt{src} est un paquet importable ;
+c'est ce qui permet de lancer un module par \texttt{python -m src.classical}.
+\fig[0.55]{Screenshot 2026-10-17 180928.png}{Arborescence du projet et contenu de \texttt{requirements.txt} dans VS Code.}
+
+\subsection{S\'ecurit\'e du d\'ep\^ot : \texttt{.gitignore}}
+Dans un projet de cryptographie, une cl\'e priv\'ee publi\'ee par erreur est une faute grave.
+Les lignes suivantes sont donc ajout\'ees \`a \texttt{.gitignore} avant le premier commit :
+\begin{lstlisting}[style=plain,language={}]
+crypto_env/
+*.pem
+vault.enc
+\end{lstlisting}
+\fig[0.6]{Screenshot 2026-10-17 181145.png}{Ajout des r\`egles de s\'ecurit\'e dans \texttt{.gitignore}.}
+
+\subsection{Premier commit}
+\fig{Screenshot 2026-10-17 181607.png}{Premier commit \texttt{chore: setup project structure and dependencies} publi\'e sur GitHub.}
+
+% ==========================================================
+%  3. NIVEAU 0
+% ==========================================================
+\section{Niveau 0 -- Initiation}
+
+% ----------------------------------------------------------
+\subsection{\'Etape 1 : Chiffre de C\'esar}
+
+\subsubsection{Principe}
+Chaque lettre est d\'ecal\'ee d'un nombre fixe $k$ de positions dans l'alphabet. En num\'erotant
+les lettres de $0$ \`a $25$ :
+\[
+  E_k(x) = (x + k) \bmod 26,
+  \qquad
+  D_k(y) = (y - k) \bmod 26 .
+\]
+Le d\'echiffrement est le chiffrement avec le d\'ecalage oppos\'e ($-k$) : en Python,
+l'op\'erateur \texttt{\%} renvoie un r\'esultat positif, ce qui rend cette astuce valable.
+
+\subsubsection{Impl\'ementation (\texttt{src/classical.py})}
+\begin{lstlisting}
+import string
+
+
+def caesar_encrypt(plaintext, shift):
+    result = []
+    for char in plaintext:
+        if char in string.ascii_letters:
+            base = ord("A") if char.isupper() else ord("a")
+            result.append(chr((ord(char) - base + shift) % 26 + base))
+        else:
+            result.append(char)
+    return "".join(result)
+
+
+def caesar_decrypt(ciphertext, shift):
+    return caesar_encrypt(ciphertext, -shift)
+
+
+def caesar_brute_force(ciphertext):
+    for shift in range(26):
+        print(f"Shift {shift:2d}: {caesar_decrypt(ciphertext, shift)}")
+\end{lstlisting}
+
+\paragraph{Exemple de calcul.} Pour la lettre \texttt{S} avec $k = 13$ :
+$\mathrm{ord}(\texttt{S}) = 83$, $83 - 65 = 18$, $18 + 13 = 31$, $31 \bmod 26 = 5$,
+$5 + 65 = 70$ soit la lettre \texttt{F}.
+
+\subsubsection{R\'esultats}
+Premier test avec le message \texttt{SECURITE INFORMATION} et un d\'ecalage de 13 : le chiffr\'e est
+\texttt{FRPHEVGR VASBEZNGVBA} et le d\'echiffrement retrouve le message d'origine.
+\fig{Screenshot 2026-10-17 193657.png}{Chiffrement et d\'echiffrement de \texttt{SECURITE INFORMATION} (d\'ecalage 13).}
+
+\paragraph{Attaque par force brute.} La fonction \texttt{caesar\_brute\_force} essaie les 26 d\'ecalages
+possibles ; le texte lisible appara\^it au d\'ecalage 13.
+\fig[0.5]{Screenshot 2026-10-17 194349.png}{Les 26 d\'ecalages possibles : le message clair appara\^it pour le d\'ecalage 13.}
+\fig{Screenshot 2026-10-17 203509.png}{Commit \texttt{feat: add caesar cipher (encrypt, decrypt, brute force)} (hash \texttt{b19ca29}).}
+
+\subsubsection{Bug d\'ecouvert : les lettres accentu\'ees}\label{sec:cesar-bug}
+Avec la premi\`ere version (condition \texttt{char.isalpha()}), le test sur
+\texttt{"Hellow W\"orld! 2026"} donne un d\'echiffrement incorrect :
+
+\fig[0.55]{Screenshot 2026-10-17 194614.png}{Code du test : message contenant la lettre \og \"o \fg.}
+\fig{Screenshot 2026-10-17 194758.png}{Le \og \"o \fg{} est d\'echiffr\'e en \og t \fg : l'information est perdue.}
+
+\paragraph{Analyse.} La m\'ethode \texttt{isalpha()} accepte les lettres Unicode comme \og \"o \fg,
+mais la formule suppose 26 lettres ASCII. Pour \og \"o \fg{} (code 246, base 97) :
+\[
+  (246 - 97 + 13) \bmod 26 = 6 \;\Rightarrow\; \texttt{g}.
+\]
+Or la lettre \og t \fg{} (code 116) donne aussi $(116 - 97 + 13) \bmod 26 = 6$, donc \texttt{g}.
+Deux lettres diff\'erentes ont le m\^eme chiffr\'e : l'application n'est pas injective, le
+d\'echiffrement ne peut plus retrouver l'original.
+
+\paragraph{Correction.} La condition devient \texttt{char in string.ascii\_letters} :
+seuls les 52 caract\`eres A--Z et a--z sont chiffr\'es, les autres sont conserv\'es tels quels.
+Apr\`es correction, le m\^eme test donne un chiffr\'e o\`u le \og \"o \fg{} reste inchang\'e, et le d\'echiffrement
+retrouve exactement le message d'origine :
+\fig{Screenshot 2026-10-17 210623.png}{Apr\`es correction : \texttt{Hellow W\"orld! 2026} est correctement d\'echiffr\'e.}
+\fig{Screenshot 2026-10-24 095657.png}{Commit de correction \texttt{fix: restrict caesar to ASCII letters}.}
+
+\subsubsection{Limites}
+\begin{itemize}
+  \item Seulement 26 cl\'es possibles : une attaque par force brute (\texttt{caesar\_brute\_force})
+        casse le chiffre instantan\'ement.
+  \item Les lettres accentu\'ees ne sont plus chiffr\'ees (donc visibles en clair).
+        Am\'elioration possible : normaliser le texte avec \texttt{unicodedata} avant chiffrement.
+\end{itemize}
+
+% ----------------------------------------------------------
+\subsection{\'Etape 2 : Chiffre de Vigen\`ere}
+
+\subsubsection{Principe}
+Chiffrement polyalphab\'etique : la cl\'e est un mot, r\'ep\'et\'e sur le message. Chaque lettre
+de la cl\'e fournit un d\'ecalage ($\texttt{A}=0$, $\texttt{B}=1$, \dots). Pour une cl\'e
+$K$ de longueur $|K|$ et la $i$-\`eme lettre du message :
+\[
+  C_i = \bigl(P_i + K_{\,i \bmod |K|}\bigr) \bmod 26 .
+\]
+Le compteur de cl\'e n'avance que sur les lettres : espaces et ponctuation ne consomment pas de cl\'e.
+
+\subsubsection{Impl\'ementation}
+\begin{lstlisting}
+def vigenere_encrypt(plaintext, key):
+    result = []
+    key = key.upper()
+    key_index = 0
+    for char in plaintext:
+        if char in string.ascii_letters:
+            shift = ord(key[key_index % len(key)]) - ord("A")
+            base = ord("A") if char.isupper() else ord("a")
+            result.append(chr((ord(char) - base + shift) % 26 + base))
+            key_index += 1
+        else:
+            result.append(char)
+    return "".join(result)
+\end{lstlisting}
+La fonction \texttt{vigenere\_decrypt} est identique, avec \texttt{- shift} \`a la place de \texttt{+ shift}.
+
+\subsubsection{R\'esultats}
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabularx}{\linewidth}{@{}l l X@{}}
+    \toprule
+    \textbf{Cl\'e} & \textbf{Message} & \textbf{Chiffr\'e}\\
+    \midrule
+    \texttt{crypto} & \texttt{ATTAQUE A L AUBE} & \texttt{CKRPJIG R J PNPG}\\
+    \texttt{crypto} & \texttt{AAAAAAAAAAAAAAAAAA} & \texttt{CRYPTOCRYPTOCRYPTO}\\
+    \texttt{A} & \texttt{NHAR KBIR HADA ASSI SALMI} & identique au message\\
+    \texttt{CLEBEAUCOUPPLUSLONGUE} & \texttt{NHAR KBIR HADA ASSI SALMI} & \texttt{PSES OBCT VUSP LMKT GNRGM}\\
+    \texttt{key1} (avant correction) & \texttt{NHAR KBIR HADA ASSI SALMI} & \texttt{XLYB UFGB REBK KWQS CEJWS}\\
+    \texttt{key} & \texttt{NHAR KBIR HADA ASSI SALMI} & \texttt{XLYB OZSV FKHY KWQS WYVQG}\\
+    \bottomrule
+  \end{tabularx}
+  \caption{Tests du chiffre de Vigen\`ere (le d\'echiffrement redonne toujours le message d'origine).}
+\end{table}
+
+\fig{Screenshot 2026-10-24 100224.png}{Chiffrement et d\'echiffrement de \texttt{ATTAQUE A L AUBE} avec la cl\'e \texttt{crypto}.}
+
+\paragraph{Observations.}
+\begin{itemize}
+  \item \textbf{Message monotone} : avec \texttt{AAAA\dots}, le chiffr\'e est exactement la cl\'e r\'ep\'et\'ee ;
+        la cl\'e fuit si le message est r\'egulier (figure ci-dessous).
+  \item \textbf{Cl\'e \texttt{A}} : d\'ecalage nul, le message n'est pas modifi\'e. Une cl\'e ne doit pas
+        \^etre compos\'ee uniquement de \og A \fg{} (figure ci-dessous).
+  \item \textbf{Cl\'e longue} : le motif p\'eriodique dispara\^it visuellement, ce qui renforce la r\'esistance
+        \`a l'analyse de fr\'equences, id\'ee \`a rapprocher du masque jetable
+        (figure ci-dessous).
+\end{itemize}
+\fig[0.8]{Screenshot 2026-10-24 100551.png}{Un message compos\'e de \og A \fg{} r\'ev\`ele la cl\'e \texttt{CRYPTO}.}
+\fig[0.8]{Screenshot 2026-10-24 100926.png}{Avec la cl\'e \texttt{A}, le chiffr\'e est identique au message.}
+\fig[0.8]{Screenshot 2026-10-24 101204.png}{Cl\'e \texttt{CLEBEAUCOUPPLUSLONGUE} : plus de r\'ep\'etition visible.}
+
+\subsubsection{Bug d\'ecouvert : la cl\'e \texttt{key1}}\label{sec:vig-bug}
+Avec la cl\'e \texttt{key1}, le programme ne l\`eve aucune erreur et le d\'echiffrement fonctionne.
+Pourtant la cl\'e est invalide :
+
+\fig[0.8]{Screenshot 2026-10-24 102435.png}{La cl\'e \texttt{key1} est accept\'ee sans erreur.}
+
+\paragraph{Analyse.} Le caract\`ere \texttt{1} a pour code ASCII 49 :
+\[
+  \mathrm{ord}(\texttt{1}) - \mathrm{ord}(\texttt{A}) = 49 - 65 = -16 \equiv 10 \pmod{26},
+\]
+soit le d\'ecalage de la lettre \texttt{K}. La cl\'e \texttt{key1} est donc \'equivalente \`a
+\texttt{keyk} : deux cl\'es diff\'erentes donnent le m\^eme chiffr\'e (v\'erifi\'e : \texttt{N}~+~10~=~\texttt{X}, \texttt{H}~+~4~=~\texttt{L}, \dots).
+Le programme acceptait donc silencieusement une cl\'e erron\'ee, ce qui est une faiblesse de s\'ecurit\'e.
+
+\paragraph{Correction.} Validation de la cl\'e au d\'ebut des deux fonctions (elle rejette aussi
+la cl\'e vide, qui provoquerait une division par z\'ero dans \texttt{\% len(key)}) :
+\begin{lstlisting}
+    if not key.isalpha() or not key.isascii():
+        raise ValueError("La cle doit contenir uniquement des lettres A-Z")
+\end{lstlisting}
+Apr\`es correction, la cl\'e \texttt{key1} est rejet\'ee par un \texttt{ValueError}, alors qu'une cl\'e valide
+(par exemple \texttt{key}) fonctionne normalement.
+\fig[0.8]{Screenshot 2026-10-24 103509.png}{Validation ajout\'ee au d\'ebut de \texttt{vigenere\_encrypt} et \texttt{vigenere\_decrypt}.}
+\fig{Screenshot 2026-10-24 103653.png}{La cl\'e \texttt{key1} est maintenant refus\'ee : \texttt{ValueError}.}
+\fig[0.8]{Screenshot 2026-10-24 103804.png}{Une cl\'e valide (\texttt{key}) est accept\'ee et le d\'echiffrement est correct.}
+\fig{Screenshot 2026-10-24 104157.png}{Commit de correction \texttt{fix: validate vigenere key (letters only, non-empty)} (hash \texttt{a411fc9}).}
+
+\fig{Screenshot 2026-10-24 101714.png}{Commit initial de l'\'etape Vigen\`ere (hash \texttt{f14855c}) publi\'e sur GitHub.}
+
+\subsubsection{Limites}
+Une cl\'e courte et r\'ep\'et\'ee reste attaquable (test de Kasiski, indice de co\"incidence).
+
+% ----------------------------------------------------------
+\subsection{\'Etape 3 : Chiffrement XOR}
+
+\subsubsection{Principe}
+L'op\'eration \og ou exclusif \fg{} (XOR, not\'ee $\oplus$) travaille bit \`a bit. Sa propri\'et\'e
+essentielle est
+\[
+  (a \oplus k) \oplus k = a,
+\]
+donc la m\^eme fonction chiffre et d\'echiffre. C'est une brique de base d'AES, de ChaCha20
+et du masque jetable.
+
+\subsubsection{Impl\'ementation}
+\begin{lstlisting}
+def xor_encrypt(data: bytes, key: bytes) -> bytes:
+    return bytes([b ^ key[i % len(key)] for i, b in enumerate(data)])
+
+
+xor_decrypt = xor_encrypt  # XOR est symetrique
+\end{lstlisting}
+
+\subsubsection{R\'esultats}
+Message \texttt{Donnees sensibles}, cl\'e \texttt{CLE\_SECRETE}. V\'erification manuelle des premiers octets :
+\begin{table}[H]
+  \centering
+  \begin{tabular}{@{}cccc@{}}
+    \toprule
+    \textbf{Message} & \textbf{Cl\'e} & \textbf{XOR (hexa)} & \textbf{Octet chiffr\'e}\\
+    \midrule
+    \texttt{D} (0x44) & \texttt{C} (0x43) & $0x44 \oplus 0x43$ & \texttt{07}\\
+    \texttt{o} (0x6f) & \texttt{L} (0x4c) & $0x6f \oplus 0x4c$ & \texttt{23}\\
+    \texttt{n} (0x6e) & \texttt{E} (0x45) & $0x6e \oplus 0x45$ & \texttt{2b}\\
+    \bottomrule
+  \end{tabular}
+  \caption{Calcul manuel des trois premiers octets (conforme \`a la sortie du programme).}
+\end{table}
+Le chiffr\'e obtenu est \texttt{07232b313620307236312b302527333636}.
+
+\subsubsection{Attaque \`a texte clair connu}
+Si l'attaquant conna\^it un message et son chiffr\'e, il retrouve la cl\'e :
+$c \oplus p = (p \oplus k) \oplus p = k$.
+L'ex\'ecution de \texttt{xor\_encrypt(encrypted, message)} renvoie \texttt{b'CLE\_SECRETECLE\_SE'} :
+la cl\'e compl\`ete est r\'ev\'el\'ee.
+\fig[0.8]{Screenshot 2026-10-25 102350.png}{Chiffr\'e en hexad\'ecimal, d\'echiffr\'e, et cl\'e retrouv\'ee par texte clair connu.}
+
+\subsubsection{Mall\'eabilit\'e : aucun contr\^ole d'int\'egrit\'e}
+Un seul bit du chiffr\'e est invers\'e (\texttt{tampered[0] \^{}= 0x01}). Le d\'echiffrement r\'eussit
+sans erreur et renvoie un texte alt\'er\'e : \texttt{b'Eonnees sensibles'} au lieu de
+\texttt{b'Donnees sensibles'}.
+\fig[0.8]{Screenshot 2026-10-25 102727.png}{Modification d'un bit : le texte est modifi\'e sans qu'aucune erreur ne soit signal\'ee.}
+
+\subsubsection{Conclusion}
+Le XOR avec une cl\'e r\'ep\'et\'ee n'offre ni r\'esistance au texte clair connu ni int\'egrit\'e.
+Il n'est s\^ur que sous la forme du masque jetable : cl\'e al\'eatoire, aussi longue que le message et
+utilis\'ee une seule fois.
+\fig{Screenshot 2026-10-25 103122.png}{Commit de l'\'etape XOR publi\'e sur GitHub.}
+
+% ----------------------------------------------------------
+\subsection{\'Etape 4 : AES-256-GCM}
+
+\subsubsection{Principe}
+AES est le standard de chiffrement sym\'etrique du NIST. Le mode GCM (Galois/Counter Mode) assure
+\textbf{simultan\'ement} :
+\begin{itemize}
+  \item la \textbf{confidentialit\'e} (le message est illisible sans la cl\'e) ;
+  \item l'\textbf{int\'egrit\'e et l'authenticit\'e} gr\^ace \`a une \'etiquette (\emph{tag}) : si le
+        chiffr\'e est modifi\'e, le d\'echiffrement \'echoue.
+\end{itemize}
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{@{}l X@{}}
+    \toprule
+    \textbf{\'El\'ement} & \textbf{R\^ole}\\
+    \midrule
+    Cl\'e (32 octets) & Secret partag\'e ; 32 octets = AES-256 (16 ou 24 octets = AES-128 ou 192)\\
+    Nonce & Valeur al\'eatoire diff\'erente \`a chaque chiffrement avec une m\^eme cl\'e\\
+    Tag & Sceau d'authentification v\'erifi\'e au d\'echiffrement\\
+    \bottomrule
+  \end{tabularx}
+  \caption{\'El\'ements d'un chiffrement AES-GCM.}
+\end{table}
+
+\subsubsection{Impl\'ementation (\texttt{src/symmetric.py})}
+\begin{lstlisting}
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+import base64
+
+
+def aes_gcm_encrypt(plaintext: str, key: bytes) -> dict:
+    cipher = AES.new(key, AES.MODE_GCM)
+    ciphertext, tag = cipher.encrypt_and_digest(plaintext.encode("utf-8"))
+    return {
+        "ciphertext": base64.b64encode(ciphertext).decode(),
+        "nonce": base64.b64encode(cipher.nonce).decode(),
+        "tag": base64.b64encode(tag).decode(),
+    }
+
+
+def aes_gcm_decrypt(enc_data: dict, key: bytes) -> str:
+    cipher = AES.new(key, AES.MODE_GCM,
+                     nonce=base64.b64decode(enc_data["nonce"]))
+    return cipher.decrypt_and_verify(
+        base64.b64decode(enc_data["ciphertext"]),
+        base64.b64decode(enc_data["tag"])).decode("utf-8")
+\end{lstlisting}
+Base64 convertit les octets en texte afin de les afficher ou de les stocker (JSON, fichier).
+La cl\'e est produite par \texttt{get\_random\_bytes(32)} (g\'en\'erateur al\'eatoire cryptographique),
+jamais par le module \texttt{random}.
+
+\subsubsection{R\'esultats}
+\fig{Screenshot 2026-10-27 172928.png}{Chiffrement puis d\'echiffrement de \og Informations confidentielles \fg{} avec AES-256-GCM.}
+
+\paragraph{Non-d\'eterminisme.} Deux ex\'ecutions sur le m\^eme message produisent des chiffr\'es
+et des nonces diff\'erents (cl\'e et nonce sont al\'eatoires), contrairement \`a C\'esar et XOR
+qui donnent toujours le m\^eme chiffr\'e pour un m\^eme couple message/cl\'e.
+\fig{Screenshot 2026-10-27 173547.png}{Deux ex\'ecutions successives : chiffr\'es et nonces diff\'erents.}
+
+\paragraph{D\'etection d'une modification.} Le m\^eme test que pour XOR (un bit invers\'e dans le chiffr\'e)
+est appliqu\'e \`a AES-GCM :
+\begin{lstlisting}
+raw = bytearray(base64.b64decode(enc["ciphertext"]))
+raw[0] ^= 0x01
+enc["ciphertext"] = base64.b64encode(bytes(raw)).decode()
+try:
+    print(aes_gcm_decrypt(enc, key))
+except ValueError as e:
+    print("Attaque detectee:", e)
+\end{lstlisting}
+\fig[0.8]{Screenshot 2026-10-27 181029.png}{Code du test de modification d'un bit sur le chiffr\'e AES-GCM.}
+\fig{Screenshot 2026-10-30 111719.png}{Avec AES-GCM, la modification d'un seul bit est d\'etect\'ee (\texttt{MAC check failed}).}
+
+\paragraph{Autres essais.}
+\begin{itemize}
+  \item Cl\'e incorrecte au d\'echiffrement : \texttt{MAC check failed}
+  \item Cl\'e de 10 octets : \texttt{Incorrect AES key length (10 bytes)}
+  \item Tailles : nonce = 16 octets, tag = 16 octets
+\end{itemize}
+Ces essais sont ex\'ecut\'es par le bloc \texttt{\_\_main\_\_} de \texttt{src/symmetric.py} :
+\fig[0.7]{NOM_DU_SCREENSHOT_CODE.png}{Code des essais compl\'ementaires : mauvaise cl\'e, cl\'e de 10 octets, tailles du nonce et du tag.}
+\fig[0.8]{NOM_DU_SCREENSHOT_RESULTATS.png}{R\'esultats : \texttt{MAC check failed}, cl\'e de 10 octets refus\'ee, nonce et tag de 16 octets.}
+
+\subsubsection{Comparaison XOR / AES-GCM}
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{@{}l X X@{}}
+    \toprule
+    \textbf{Crit\`ere} & \textbf{XOR (cl\'e r\'ep\'et\'ee)} & \textbf{AES-256-GCM}\\
+    \midrule
+    M\^eme message, m\^eme cl\'e & Toujours le m\^eme chiffr\'e & Chiffr\'e diff\'erent (nonce)\\
+    Texte clair connu & La cl\'e est retrouv\'ee & Cl\'e non r\'ecup\'erable\\
+    Un bit modifi\'e & Non d\'etect\'e (\texttt{Eonnees}) & \texttt{MAC check failed}\\
+    Int\'egrit\'e & Aucune & Tag d'authentification\\
+    \bottomrule
+  \end{tabularx}
+  \caption{Comparaison des deux m\'ecanismes sur les m\^emes essais.}
+\end{table}
+
+\subsubsection{Bonnes pratiques}
+\begin{itemize}
+  \item Ne jamais r\'eutiliser un nonce avec la m\^eme cl\'e : en GCM, cela compromet la confidentialit\'e et
+        permet de falsifier des messages. La biblioth\`eque g\'en\`ere un nonce al\'eatoire \`a chaque
+        appel de \texttt{AES.new}.
+  \item G\'en\'erer les cl\'es avec \texttt{get\_random\_bytes}.
+  \item Ne jamais \'ecrire une cl\'e en dur dans le code (th\`eme du gestionnaire de secrets, niveau 3).
+\end{itemize}
+\fig{Screenshot 2026-10-27 182324.png}{Commit de l'\'etape AES-256-GCM publi\'e sur GitHub.}
+
+% ==========================================================
+%  4. HISTORIQUE GIT
+% ==========================================================
+\section{Historique des commits}
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{@{}l X@{}}
+    \toprule
+    \textbf{Commit} & \textbf{Contenu}\\
+    \midrule
+    \texttt{3784701} & Structure du projet et d\'ependances\\
+    \texttt{b19ca29} & Ajout du chiffre de C\'esar (chiffrement, d\'echiffrement, force brute)\\
+    \texttt{6bae3c5} & Documentation : section C\'esar du compte rendu et captures\\
+    \texttt{57dfdb3} & Correction de C\'esar (lettres ASCII uniquement)\\
+    \texttt{f14855c} & Ajout du chiffre de Vigen\`ere\\
+    \texttt{a411fc9} & Validation de la cl\'e de Vigen\`ere (lettres uniquement, non vide)\\
+    \texttt{f736ee1} & Ajout du chiffrement XOR\\
+    \texttt{3126729} & Ajout d'AES-256-GCM avec v\'erification d'int\'egrit\'e\\
+    \bottomrule
+  \end{tabularx}
+  \caption{Principaux commits publi\'es sur \texttt{main} (d\'ep\^ot \url{\depot}).}
+\end{table}
+
+\fig{Screenshot 2026-10-17 203957.png}{Publication de la documentation (compte rendu et captures) sur GitHub, hash \texttt{6bae3c5}.}
+
+% ==========================================================
+%  5. DIFFICULTES
+% ==========================================================
+\section{Difficult\'es rencontr\'ees et le\c{c}ons}
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{@{}l X X@{}}
+    \toprule
+    \textbf{Probl\`eme} & \textbf{Cause} & \textbf{Le\c{c}on}\\
+    \midrule
+    \og \"o \fg{} mal d\'echiffr\'e (C\'esar) &
+    \texttt{isalpha()} accepte l'Unicode, la formule suppose A--Z (chiffrement non injectif) &
+    Un chiffrement doit \^etre r\'eversible ; restreindre explicitement l'alphabet\\
+    Cl\'e \texttt{key1} accept\'ee (Vigen\`ere) &
+    \texttt{ord('1') - ord('A')} = $-16 \equiv 10 \pmod{26}$ &
+    Valider les entr\'ees : une cl\'e invalide ne doit pas fonctionner en silence\\
+    Modification non d\'etect\'ee (XOR) &
+    Aucun contr\^ole d'int\'egrit\'e &
+    Utiliser un mode authentifi\'e (AES-GCM)\\
+    \bottomrule
+  \end{tabularx}
+  \caption{Synth\`ese des erreurs et de ce qu'elles ont appris.}
+\end{table}
+
+% ==========================================================
+%  6. LIMITES
+% ==========================================================
+\section{Limites et am\'eliorations pr\'evues}
+\begin{itemize}
+  \item \textbf{C\'esar et Vigen\`ere} : algorithmes p\'edagogiques, non s\^urs ; la gestion des lettres accentu\'ees
+        pourrait passer par une normalisation Unicode.
+  \item \textbf{XOR} : s\^ur uniquement comme masque jetable ; ici d\'emonstration de ses faiblesses.
+  \item \textbf{AES-GCM} : les cl\'es sont g\'en\'er\'ees en m\'emoire et non stock\'ees ; la gestion et la
+        rotation des cl\'es seront trait\'ees avec le gestionnaire de secrets (niveau 3).
+  \item \textbf{Tests} : les essais sont pour l'instant des scripts dans \texttt{\_\_main\_\_} ; ils seront
+        remplac\'es par des tests unitaires (\texttt{unittest}) dans le dossier \texttt{tests/} au niveau~1.
+\end{itemize}
+
+% ==========================================================
+%  7. CONCLUSION
+% ==========================================================
+\section{Conclusion et suite}
+Ce premier volet a permis de passer des chiffrements classiques, instructifs mais faibles, \`a un chiffrement
+authentifi\'e moderne, et de comprendre \emph{pourquoi} chaque \'etape succ\`ede \`a la pr\'ec\'edente
+(attaque par force brute, fuite de cl\'e, mall\'eabilit\'e). Les erreurs rencontr\'ees ont \'et\'e
+la meilleure source d'apprentissage.
+
+\paragraph{Suite du projet.} RSA (chiffrement OAEP et signature), \'echange de cl\'es Diffie-Hellman,
+puis le niveau~1 (module de hachage et tests unitaires), le niveau~2 (PKI X.509 et messagerie E2E)
+et le niveau~3 (gestionnaire de secrets avec rotation et audit).
+
+% ==========================================================
+%  8. REFERENCES
+% ==========================================================
+\section*{R\'ef\'erences}
+\addcontentsline{toc}{section}{R\'ef\'erences}
+\begin{itemize}
+  \item Documentation PyCryptodome : \url{https://pycryptodome.readthedocs.io/}
+  \item Documentation \texttt{cryptography} : \url{https://cryptography.io/en/latest/}
+  \item NIST SP 800-38D : \emph{Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM)}
+  \item NIST SP 800-57 : \emph{Recommendation for Key Management}
+  \item D\'ep\^ot du projet : \url{\depot}
+\end{itemize}
+
+\end{document}
