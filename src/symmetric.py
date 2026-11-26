@@ -1,6 +1,8 @@
+import base64
+import json
+
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
-import base64
 
 
 def aes_gcm_encrypt(plaintext: str, key: bytes) -> dict:
@@ -14,11 +16,41 @@ def aes_gcm_encrypt(plaintext: str, key: bytes) -> dict:
 
 
 def aes_gcm_decrypt(enc_data: dict, key: bytes) -> str:
-    cipher = AES.new(key, AES.MODE_GCM,
-                     nonce=base64.b64decode(enc_data["nonce"]))
-    return cipher.decrypt_and_verify(
-        base64.b64decode(enc_data["ciphertext"]),
-        base64.b64decode(enc_data["tag"])).decode("utf-8")
+    return _decrypt_gcm(enc_data, key, validate=False)
+
+
+def _decrypt_gcm(enc_data: dict, key: bytes, *, validate: bool) -> str:
+    nonce = base64.b64decode(enc_data["nonce"], validate=validate)
+    ciphertext = base64.b64decode(enc_data["ciphertext"], validate=validate)
+    tag = base64.b64decode(enc_data["tag"], validate=validate)
+    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+    return cipher.decrypt_and_verify(ciphertext, tag).decode("utf-8")
+
+
+class SymmetricCrypto:
+    """AES-GCM helpers that exchange a Base64-encoded JSON token."""
+
+    @staticmethod
+    def generate_key(bits: int = 256) -> bytes:
+        if not isinstance(bits, int) or bits not in (128, 192, 256):
+            raise ValueError("AES keys must contain 128, 192 or 256 bits")
+        return get_random_bytes(bits // 8)
+
+    @staticmethod
+    def encrypt(plaintext: str, key: bytes) -> str:
+        data = aes_gcm_encrypt(plaintext, key)
+        payload = {"ct": data["ciphertext"], "n": data["nonce"], "t": data["tag"]}
+        return base64.b64encode(json.dumps(payload).encode("utf-8")).decode("ascii")
+
+    @staticmethod
+    def decrypt(token: str, key: bytes) -> str:
+        payload = json.loads(base64.b64decode(token, validate=True))
+        if not isinstance(payload, dict) or not all(
+            isinstance(payload.get(field), str) for field in ("ct", "n", "t")
+        ):
+            raise ValueError("Invalid AES-GCM token fields")
+        data = {"ciphertext": payload["ct"], "nonce": payload["n"], "tag": payload["t"]}
+        return _decrypt_gcm(data, key, validate=True)
 
 
 if __name__ == "__main__":
