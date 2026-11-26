@@ -1,8 +1,9 @@
-"""RSA encryption and signatures for CryptoVault exercises."""
+"""RSA and Diffie-Hellman for CryptoVault exercises."""
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from cryptography.hazmat.primitives.asymmetric import dh, padding, rsa
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 
 def generate_rsa_key() -> rsa.RSAPrivateKey:
@@ -37,3 +38,15 @@ def _oaep() -> padding.OAEP:
     return padding.OAEP(
         mgf=padding.MGF1(hashes.SHA256()), algorithm=hashes.SHA256(), label=None
     )
+
+
+def derive_dh_key(
+    private_key: dh.DHPrivateKey, peer_public_key: dh.DHPublicKey, salt: bytes
+) -> bytes:
+    """Derive the demo key using a public salt agreed on by both peers."""
+    return HKDF(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        info=b"CryptoVault Diffie-Hellman demo",
+    ).derive(private_key.exchange(peer_public_key))
