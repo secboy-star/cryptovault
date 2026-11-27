@@ -70,10 +70,17 @@ class SecretVault:
     def store(self, name: str, value: str, meta=None) -> None:
         if not name.strip():
             raise ValueError("A secret name is required")
+        self._write_entry(self._read(), name, value, meta or {})
+
+    def rotate(self, name: str, new_value: str) -> None:
         snapshot = self._read()
+        current = snapshot["secrets"][name]
+        self._write_entry(snapshot, name, new_value, current["meta"])
+
+    def _write_entry(self, snapshot: dict, name: str, value: str, meta: dict) -> None:
         records = snapshot["secrets"]
         version = records.get(name, {}).get("version", 0) + 1
-        records[name] = {"value": value, "version": version, "meta": meta or {},
+        records[name] = {"value": value, "version": version, "meta": meta,
                          "created": datetime.now(timezone.utc).isoformat()}
         save_vault(self._path, json.dumps(snapshot), self._password)
 
