@@ -221,6 +221,7 @@ __marimo__/
 crypto_env/
 *.pem
 vault.
+vault.enc
 *.aux
 *.log
 *.out

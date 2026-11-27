@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 from hashlib import pbkdf2_hmac
 from os import fsync
 from pathlib import Path
@@ -51,3 +52,30 @@ def save_vault(path: Path, payload: str, password: str) -> None:
 
 def load_vault(path: Path, password: str) -> str:
     return open_vault(Path(path).read_text(encoding="utf-8"), password)
+
+
+class SecretVault:
+    """A single-writer vault backed by an encrypted local file."""
+
+    def __init__(self, master_password: str, vault_file="vault.enc"):
+        self._path = Path(vault_file)
+        self._password = master_password
+
+    def _read(self) -> dict:
+        try:
+            return json.loads(load_vault(self._path, self._password))
+        except FileNotFoundError:
+            return {"secrets": {}}
+
+    def store(self, name: str, value: str, meta=None) -> None:
+        if not name.strip():
+            raise ValueError("A secret name is required")
+        snapshot = self._read()
+        records = snapshot["secrets"]
+        version = records.get(name, {}).get("version", 0) + 1
+        records[name] = {"value": value, "version": version, "meta": meta or {},
+                         "created": datetime.now(timezone.utc).isoformat()}
+        save_vault(self._path, json.dumps(snapshot), self._password)
+
+    def get(self, name: str) -> str:
+        return self._read()["secrets"][name]["value"]
