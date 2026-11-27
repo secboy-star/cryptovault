@@ -70,19 +70,35 @@ class SecretVault:
     def store(self, name: str, value: str, meta=None) -> None:
         if not name.strip():
             raise ValueError("A secret name is required")
-        self._write_entry(self._read(), name, value, meta or {})
+        self._write_entry(self._read(), "STORE", name, value, meta or {})
 
     def rotate(self, name: str, new_value: str) -> None:
         snapshot = self._read()
         current = snapshot["secrets"][name]
-        self._write_entry(snapshot, name, new_value, current["meta"])
+        self._write_entry(snapshot, "ROTATE", name, new_value, current["meta"])
 
-    def _write_entry(self, snapshot: dict, name: str, value: str, meta: dict) -> None:
+    def _write_entry(self, snapshot: dict, action: str, name: str, value: str, meta: dict) -> None:
         records = snapshot["secrets"]
         version = records.get(name, {}).get("version", 0) + 1
         records[name] = {"value": value, "version": version, "meta": meta,
                          "created": datetime.now(timezone.utc).isoformat()}
-        save_vault(self._path, json.dumps(snapshot), self._password)
+        self._save_event(snapshot, action, name, version)
 
     def get(self, name: str) -> str:
-        return self._read()["secrets"][name]["value"]
+        snapshot = self._read()
+        entry = snapshot["secrets"].get(name)
+        if entry is None:
+            self._save_event(snapshot, "DENIED", name)
+            raise KeyError(name)
+        self._save_event(snapshot, "READ", name, entry["version"])
+        return entry["value"]
+
+    def audit_log(self) -> list:
+        return self._read().get("audit", [])
+
+    def _save_event(self, snapshot: dict, action: str, name: str, version=None) -> None:
+        snapshot.setdefault("audit", []).append({
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "action": action, "name": name, "version": version,
+        })
+        save_vault(self._path, json.dumps(snapshot), self._password)
