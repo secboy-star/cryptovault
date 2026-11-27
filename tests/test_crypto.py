@@ -31,6 +31,18 @@ class HashingTests(unittest.TestCase):
             "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7",
         )
 
+    def test_verify_hmac_sha256_accepts_the_known_digest(self):
+        digest = "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7"
+        key = b"\x0b" * 20
+        self.assertTrue(SecureHash.verify_hmac_sha256("Hi There", key, digest.upper()))
+        self.assertFalse(SecureHash.verify_hmac_sha256("Changed", key, digest))
+        self.assertFalse(SecureHash.verify_hmac_sha256("Hi There", b"wrong", digest))
+
+    def test_verify_hmac_sha256_rejects_invalid_digests(self):
+        for digest in ("", "0" * 64, "é" * 64, " " * 2 + "00" * 31, None):
+            with self.subTest(digest=digest):
+                self.assertFalse(SecureHash.verify_hmac_sha256("Hi There", b"\x0b" * 20, digest))
+
 
 class SymmetricCryptoTests(unittest.TestCase):
     def test_round_trip_with_supported_key_sizes(self):

@@ -34,5 +34,16 @@ class SecureHash:
         return hmac.new(key, message.encode("utf-8"), hashlib.sha256).hexdigest()
 
     @staticmethod
+    def verify_hmac_sha256(message: str, key: bytes, digest: str) -> bool:
+        if not isinstance(digest, str) or len(digest) != 64:
+            return False
+        try:
+            supplied = bytes.fromhex(digest)
+        except ValueError:
+            return False
+        expected = bytes.fromhex(SecureHash.hmac_sha256(message, key))
+        return len(supplied) == len(expected) and hmac.compare_digest(expected, supplied)
+
+    @staticmethod
     def generate_token(length: int = 32) -> str:
         return secrets.token_hex(length)
